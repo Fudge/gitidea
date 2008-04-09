@@ -1,0 +1,97 @@
+<!DOCTYPE idea-plugin PUBLIC "Plugin/DTD" "http://plugins.intellij.net/plugin.dtd">
+
+<!--
+Copyright 2007 Decentrix Inc
+Copyright 2007 Aspiro AS
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+-->
+<idea-plugin>
+	<name>Git Integration</name>
+	<id>GitPlugin</id>
+	<version>0.0.3</version>
+    <vendor>Aspiro AS</vendor>
+    <idea-version since-build="7118" />
+    <description>Basic Git integration.</description>
+
+    <application-components>
+        <component>
+            <implementation-class>com.aspiro.git.GitFileSystem</implementation-class>
+        </component>
+    </application-components>
+
+    <extensions xmlns="com.intellij" defaultExtensionNs="com.intellij">
+		<vcs name="Git" vcsClass="com.aspiro.git.GitVcs"/>
+
+		<projectService
+				serviceInterface="com.aspiro.git.GitDiffProvider"
+				serviceImplementation="com.aspiro.git.GitDiffProvider"/>
+		<projectService
+				serviceInterface="com.aspiro.git.GitCheckinEnvironment"
+				serviceImplementation="com.aspiro.git.GitCheckinEnvironment"/>
+		<projectService
+				serviceInterface="com.aspiro.git.GitChangeProvider"
+				serviceImplementation="com.aspiro.git.GitChangeProvider"/>
+		<projectService
+				serviceInterface="com.aspiro.git.GitHistoryProvider"
+				serviceImplementation="com.aspiro.git.GitHistoryProvider"/>
+       <projectService
+             serviceInterface="com.aspiro.git.GitRollbackEnvironment"
+             serviceImplementation="com.aspiro.git.GitRollbackEnvironment"/>
+      <projectService
+				serviceInterface="com.aspiro.git.GitVcsSettings"
+				serviceImplementation="com.aspiro.git.GitVcsSettings"/>
+        <fileEditorProvider implementation="com.aspiro.git.GitRevisionGraphEditorProvider"/>
+	</extensions>
+
+	<actions>
+        <action id="Git.Clone" class="com.aspiro.git.GitClone" text="Clone Git Repository" >
+            <add-to-group group-id="VcsGroups" anchor="last"/>
+        </action>
+        <group id="Git.Menu" class="com.aspiro.git.actions.GitMenu" popup="true" text="Git">
+			<reference id="CheckinFiles"/>
+			<reference id="UpdateFiles"/>
+			<reference id="IntegrateFiles"/>
+			<reference id="Annotate"/>
+<!--			<reference id="Compare.SameVersion"/> -->
+			<reference id="Compare.LastVersion"/>
+			<reference id="Compare.Selected"/>
+			<action id="Git.Add" class="com.aspiro.git.actions.GitAdd" text="Add">
+				<keyboard-shortcut first-keystroke="control alt A" keymap="$default"/>
+			</action>
+			<action id="Git.Revert" class="com.aspiro.git.actions.GitRevert" text="Revert">
+				<keyboard-shortcut first-keystroke="control alt R" keymap="$default"/>
+			</action>
+			<action id="Git.Delete" class="com.aspiro.git.actions.GitDelete" text="Delete">
+				<keyboard-shortcut first-keystroke="control alt D" keymap="$default"/>
+			</action>
+			<!--<reference id="ChangesView.Rollback"/>-->
+			<reference id="Vcs.ShowTabbedFileHistory"/>
+			<reference id="Vcs.ShowHistoryForBlock"/>
+			<!--<action id="Resolve" class="org.jetbrains.idea.perforce.actions.ResolveAction"/>-->
+			<!--<action id="ResolveAll" class="org.jetbrains.idea.perforce.actions.ResolveAllAction"/>-->
+			<reference id="ChangesView.Browse"/>
+			<!--<action id="RevisionGraph" class="org.jetbrains.idea.perforce.actions.RevisionGraphAction"/>-->
+			<!--<action id="TimeLapseView" class="org.jetbrains.idea.perforce.actions.TimeLapseViewAction"/>-->
+			<separator/>
+			<action id="Git.Tag" class="com.aspiro.git.actions.GitTag" text="Tag..."/>
+			<action id="Git.Pull" class="com.aspiro.git.actions.GitPull" text="Pull..."/>
+			<action id="Git.Push" class="com.aspiro.git.actions.GitPush" text="Push..."/>
+			<separator/>
+            <action id="Git.Checkout" class="com.aspiro.git.actions.GitCheckout" text="Checkout..."/>
+            <action id="Git.Merge" class="com.aspiro.git.actions.GitMerge" text="Merge..."/>
+<!--            <action id="Git.RevisionGraph" class="com.aspiro.git.actions.GitRevisionGraph" text="Show Revision Graph"/> -->
+            <separator/>
+			<add-to-group group-id="VcsGroup" anchor="last"/>
+            <add-to-group group-id="VcsGroups" anchor="last" />
+<!--           <add-to-group anchor="last" group-id="VcsGlobalGroup" /> -->
+      </group>
+	</actions>
+</idea-plugin>
