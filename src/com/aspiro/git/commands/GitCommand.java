@@ -4,7 +4,6 @@ import com.aspiro.git.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vcs.FilePath;
-import com.intellij.openapi.vcs.FileStatus;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.history.VcsFileRevision;
 import com.intellij.openapi.vfs.VfsUtil;
@@ -14,6 +13,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.util.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -423,7 +425,63 @@ public class GitCommand
 		execute( DELETE_CMD, (String[]) null, fixedFileNames );
 	}
 
-	/**
+   /**
+    * Builds the annotation for the specified file.
+    *
+    * @param filePath The path to the file.
+    * @return The GitFileAnnotation.
+    * @throws com.intellij.openapi.vcs.VcsException
+    *          If it fails...
+    */
+   public GitFileAnnotation annotate(FilePath filePath) throws VcsException {
+      String[] options = new String[]{"-l", "--"};
+
+      String[] args = new String[]{getRelativeFilePath(filePath.getPath(), vcsRoot)};
+
+      InputStream cmdOutput = execute("annotate", options, args);
+      BufferedReader in = new BufferedReader(new InputStreamReader(cmdOutput));
+      GitFileAnnotation annotation = new GitFileAnnotation(project);
+
+      SimpleDateFormat dateFormat = new SimpleDateFormat("yyy-MM-dd HH:mm:ss Z");
+
+      String Line;
+      try {
+         while ((Line = in.readLine()) != null) {
+            String annValues[] = Line.split("\t", 4);
+            if (annValues.length != 4) {
+               throw new VcsException("Framing error: unexpected number of values");
+            }
+
+            String revision = annValues[0];
+            String user = annValues[1];
+            String dateStr = annValues[2];
+            String numberedLine = annValues[3];
+
+            if (revision.length() != 40) {
+               throw new VcsException("Framing error: Illegal revision number: " + revision);
+            }
+
+            int idx = numberedLine.indexOf(')');
+            if (!user.startsWith("(") || idx <= 0) {
+               throw new VcsException("Framing error: unexpected format");
+            }
+            user = user.substring(1).trim(); // Ditch the (
+            Long lineNumber = Long.valueOf(numberedLine.substring(0, idx));
+            String lineContents = numberedLine.substring(idx + 1);
+
+            Date date = dateFormat.parse(dateStr);
+            annotation.appendLineInfo(date, new GitRevisionNumber(revision, date.getTime()), user, lineContents, lineNumber);
+         }
+
+      } catch (IOException e) {
+         throw new VcsException("Failed to load annotations", e);
+      } catch (ParseException e) {
+         throw new VcsException("Failed to load annotations", e);
+      }
+      return annotation;
+   }
+
+   /**
 	 * Builds the revision history for the specifid file.
 	 *
 	 * @param filePath The path to the file.

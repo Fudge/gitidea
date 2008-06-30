@@ -31,6 +31,9 @@ specific language governing permissions and limitations under the License.
 		<vcs name="Git" vcsClass="com.aspiro.git.GitVcs"/>
 
 		<projectService
+				serviceInterface="com.aspiro.git.GitAnnotationProvider"
+				serviceImplementation="com.aspiro.git.GitAnnotationProvider"/>
+		<projectService
 				serviceInterface="com.aspiro.git.GitDiffProvider"
 				serviceImplementation="com.aspiro.git.GitDiffProvider"/>
 		<projectService

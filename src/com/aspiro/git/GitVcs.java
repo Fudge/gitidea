@@ -12,6 +12,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vcs.*;
+import com.intellij.openapi.vcs.annotate.AnnotationProvider;
 import com.intellij.openapi.vcs.changes.ChangeProvider;
 import com.intellij.openapi.vcs.checkin.CheckinEnvironment;
 import com.intellij.openapi.vcs.diff.DiffProvider;
@@ -31,7 +32,7 @@ import java.util.List;
  * Based on the Mercurial Implementation.
  *
  * Modified for Git by Erlend Simonsen
- * 
+ *
  * <p/>
  * Copyright 2007 Decentrix Inc
  * <p/>
@@ -56,6 +57,7 @@ public class GitVcs extends AbstractVcs implements Disposable
    private GitCheckinEnvironment checkinEnvironment;
    private GitRollbackEnvironment rollbackEnvironment;
 
+   private GitAnnotationProvider annotationProvider;
    private GitDiffProvider diffProvider;
 	private GitHistoryProvider historyProvider;
 
@@ -72,6 +74,7 @@ public class GitVcs extends AbstractVcs implements Disposable
 			@NotNull final GitChangeProvider gitChangeProvider,
 			@NotNull final GitCheckinEnvironment gitCheckinEnvironment,
 			@NotNull final ProjectLevelVcsManager vcsManager,
+			@NotNull final GitAnnotationProvider annotationProvider,
 			@NotNull final GitDiffProvider diffProvider,
 			@NotNull final GitHistoryProvider historyProvider,
          @NotNull final GitRollbackEnvironment rollbackEnvironment,
@@ -80,13 +83,14 @@ public class GitVcs extends AbstractVcs implements Disposable
 		super( myProject );
 		this.vcsManager = vcsManager;
 		this.settings = settings;
-        this.project = project;
+        this.project = myProject;
 
       addConfirmation = vcsManager.getStandardConfirmation( VcsConfiguration.StandardConfirmation.ADD, this );
 		delConfirmation = vcsManager.getStandardConfirmation( VcsConfiguration.StandardConfirmation.REMOVE, this );
 
 		changeProvider = gitChangeProvider;
 		checkinEnvironment = gitCheckinEnvironment;
+		this.annotationProvider = annotationProvider;
 		this.diffProvider = diffProvider;
 		editorColorsScheme = EditorColorsManager.getInstance().getGlobalScheme();
 		this.historyProvider = historyProvider;
@@ -228,11 +232,16 @@ public class GitVcs extends AbstractVcs implements Disposable
 	{
 		vcsManager.addMessageToConsoleWindow( message, editorColorsScheme.getAttributes( text ) );
         if(message.contains("fatal:") ) {
-            Messages.showErrorDialog( project, message, "Error");   
+            Messages.showErrorDialog( project, message, "Error");
         }
     }
 
-	@Nullable
+    @Nullable
+    public AnnotationProvider getAnnotationProvider() {
+        return annotationProvider;
+    }
+
+    @Nullable
 	public DiffProvider getDiffProvider()
 	{
 		return diffProvider;

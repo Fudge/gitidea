@@ -40,8 +40,6 @@ public class GitRevisionNumber implements VcsRevisionNumber
 
    public String asString()
 	{
-		if(rev.equals(TIP))
-			return "HEAD";
 		return rev;
 	}
 
@@ -65,4 +63,25 @@ public class GitRevisionNumber implements VcsRevisionNumber
 	{
 		return rev;
 	}
+
+   public String getShortRev() {
+      return rev.length() == 40 ? rev.substring(0, 8) : rev;
+   }
+
+   public boolean equals(Object o) {
+      if (this == o) {
+         return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+         return false;
+      }
+
+      GitRevisionNumber that = (GitRevisionNumber) o;
+
+      return rev == null ? that.rev == null : rev.equals(that.rev);
+   }
+
+   public int hashCode() {
+      return rev == null ? 0 : rev.hashCode();
+   }
 }
